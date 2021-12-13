@@ -1,4 +1,4 @@
-import algoliasearch from 'algoliasearch/lite';
+
 import React, { Component } from 'react';
 import {
   InstantSearch,
@@ -9,15 +9,75 @@ import {
   ClearRefinements,
   RefinementList,
   Configure,
-  SortBy,
-  Rheostat
+  SortBy
 } from 'react-instantsearch-dom';
+import algoliasearch from 'algoliasearch/lite';
+import Rheostat from 'rheostat';
 import PropTypes from 'prop-types';
 import './App.css';
+import { connectRange } from 'react-instantsearch-dom';
+
+// Prerequisite: install rheostat@4
+import 'rheostat/initialize';
+import 'rheostat/css/rheostat.css';
 
 const searchClient = algoliasearch("1DDP2SO5ID", "97fa4f0a39cda3d338bc74dc2d4214ff");
 
+const RangeSlider = ({ min, max, currentRefinement, canRefine, refine }) => {
+  const [stateMin, setStateMin] = React.useState(min);
+  const [stateMax, setStateMax] = React.useState(max);
+
+  React.useEffect(() => {
+    if (canRefine) {
+      setStateMin(currentRefinement.min);
+      setStateMax(currentRefinement.max);
+    }
+  }, [currentRefinement.min, currentRefinement.max]);
+
+  if (min === max) {
+    return null;
+  }
+
+  const onChange = ({ values: [min, max] }) => {
+    if (currentRefinement.min !== min || currentRefinement.max !== max) {
+      refine({ min, max });
+    }
+  };
+
+  const onValuesUpdated = ({ values: [min, max] }) => {
+    setStateMin(min);
+    setStateMax(max);
+  };
+
+  return (
+    <Rheostat
+      min={min}
+      max={max}
+      values={[currentRefinement.min, currentRefinement.max]}
+      onChange={onChange}
+      onValuesUpdated={onValuesUpdated}
+    >
+      <div
+        className="rheostat-marker rheostat-marker--large"
+        style={{ left: 0 }}
+      >
+        <div className="rheostat-value">{stateMin}</div>
+      </div>
+      <div
+        className="rheostat-marker rheostat-marker--large"
+        style={{ right: 0 }}
+      >
+        <div className="rheostat-value">{stateMax}</div>
+      </div>
+    </Rheostat>
+  );
+};
+
+const CustomRangeSlider = connectRange(RangeSlider);
+
 class App extends Component {
+
+  
   render() {
     return (
       <div className="ais-InstantSearch">
@@ -31,10 +91,15 @@ class App extends Component {
               <ClearRefinements />
               <h2>Region</h2>
               <RefinementList attribute="domain" />
-              {/* <Rheostat /> */}
-              {/* <SortBy
-                items={[{label: 'Price (asc)', value: 'wine_price_asc'}]}
-              /> */}
+              <CustomRangeSlider attribute="year" />
+              {/* <div></div> */}
+              <SortBy
+                defaultRefinement="wine"
+                items={[
+                  {label: 'Price (asc)', value: 'wine_price_asc'},
+                  {label: 'Price (dsc)', value: 'wine_price_dsc'}
+              ]}
+              />
               <Configure hitsPerPage={8} />
             </div>
             <div className="right-panel">
