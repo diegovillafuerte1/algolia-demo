@@ -16,8 +16,6 @@ import Rheostat from 'rheostat';
 import PropTypes from 'prop-types';
 import './App.css';
 import { connectRange } from 'react-instantsearch-dom';
-
-// Prerequisite: install rheostat@4
 import 'rheostat/initialize';
 import 'rheostat/css/rheostat.css';
 
@@ -91,11 +89,13 @@ class App extends Component {
               <ClearRefinements />
               <h2>Region</h2>
               <RefinementList attribute="domain" />
+              <h2>Year</h2>
               <CustomRangeSlider attribute="year" />
-              {/* <div></div> */}
+              <h2>Sort</h2>
               <SortBy
                 defaultRefinement="wine"
                 items={[
+                  {label: 'Default', value: 'wine'},
                   {label: 'Price (asc)', value: 'wine_price_asc'},
                   {label: 'Price (dsc)', value: 'wine_price_dsc'}
               ]}
